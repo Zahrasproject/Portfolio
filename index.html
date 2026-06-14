@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mein Portfolio</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Portfolio" />
+  <meta name="theme-color" content="#f06292" />
+  <link rel="apple-touch-icon" href="icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #f06292;
+      color: white;
+      padding: 24px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 { font-size: 22px; font-weight: 600; }
+    header span { font-size: 13px; opacity: 0.7; }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 32px 16px; }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .card .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .card .value { font-size: 26px; font-weight: 700; }
+    .card.green .value { color: #16a34a; }
+    .card.red .value { color: #dc2626; }
+    .card.blue .value { color: #f06292; }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 28px 0 12px;
+      color: #f06292;
+    }
+
+    table {
+      width: 100%;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      border-collapse: collapse;
+      overflow: hidden;
+    }
+
+    th {
+      background: #f06292;
+      color: white;
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 14px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid #f0f2f5;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fafb; }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge.aktie { background: #dbeafe; color: #1d4ed8; }
+    .badge.etf { background: #dcfce7; color: #15803d; }
+    .badge.krypto { background: #fef3c7; color: #b45309; }
+
+    .plus { color: #16a34a; font-weight: 600; }
+    .minus { color: #dc2626; font-weight: 600; }
+
+    .actions { display: flex; gap: 10px; margin: 24px 0 8px; flex-wrap: wrap; }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: opacity 0.2s;
+    }
+
+    button:hover { opacity: 0.85; }
+
+    .btn-add { background: #f06292; color: white; }
+    .btn-del { background: #fee2e2; color: #dc2626; }
+
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+
+    .modal h2 { font-size: 18px; margin-bottom: 20px; color: #f06292; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 6px; text-transform: uppercase; }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: #f06292; }
+
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-save { background: #f06292; color: white; flex: 1; padding: 12px; }
+    .btn-cancel { background: #f3f4f6; color: #555; flex: 1; padding: 12px; }
+
+    .empty { text-align: center; color: #aaa; padding: 40px; font-size: 14px; }
+
+    footer { text-align: center; color: #bbb; font-size: 12px; padding: 32px; }
+
+    /* Mobile */
+    @media (max-width: 600px) {
+      header { padding: 16px; }
+      header h1 { font-size: 18px; }
+      header span { display: none; }
+      .container { padding: 16px; }
+      .summary { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+      .card { padding: 14px 16px; }
+      .card .value { font-size: 20px; }
+      .section-title { margin: 16px 0 8px; }
+      .actions { gap: 8px; }
+      button { padding: 12px 16px; font-size: 13px; width: 100%; }
+      table { display: block; overflow-x: auto; }
+      th, td { padding: 10px 12px; font-size: 12px; white-space: nowrap; }
+      .modal { padding: 20px 16px; margin: 16px; border-radius: 12px; }
+      .form-group input, .form-group select { font-size: 16px; padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Mein Portfolio</h1>
+  <span id="datum"></span>
+</header>
+
+<div class="container">
+
+  <div class="summary">
+    <div class="card blue">
+      <div class="label">Investiert</div>
+      <div class="value" id="sum-invest">0,00 €</div>
+    </div>
+    <div class="card blue">
+      <div class="label">Aktueller Wert</div>
+      <div class="value" id="sum-wert">0,00 €</div>
+    </div>
+    <div class="card" id="card-gl">
+      <div class="label">Gewinn / Verlust</div>
+      <div class="value" id="sum-gl">0,00 €</div>
+    </div>
+    <div class="card" id="card-glp">
+      <div class="label">Performance</div>
+      <div class="value" id="sum-glp">0,00 %</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn-add" onclick="openModal()">+ Position hinzufügen</button>
+    <button class="btn-del" onclick="loescheAuswahl()">Auswahl löschen</button>
+  </div>
+
+  <div class="section-title">Meine Positionen</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th><input type="checkbox" id="checkAll" onchange="alleAuswaehlen(this)"></th>
+        <th>Name</th>
+        <th>Typ</th>
+        <th>Investiert</th>
+        <th>Aktueller Wert</th>
+        <th>Gewinn/Verlust</th>
+        <th>Performance</th>
+        <th>Notiz</th>
+      </tr>
+    </thead>
+    <tbody id="tabelle"></tbody>
+  </table>
+
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2>Position hinzufügen</h2>
+    <div class="form-group">
+      <label>Name</label>
+      <input type="text" id="inp-name" placeholder="z.B. Apple, Bitcoin, MSCI World..." />
+    </div>
+    <div class="form-group">
+      <label>Typ</label>
+      <select id="inp-typ">
+        <option value="aktie">Aktie</option>
+        <option value="etf">ETF</option>
+        <option value="krypto">Krypto</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Investierter Betrag (€)</label>
+      <input type="number" id="inp-invest" placeholder="z.B. 1000" min="0" step="0.01" />
+    </div>
+    <div class="form-group">
+      <label>Aktueller Wert (€)</label>
+      <input type="number" id="inp-wert" placeholder="z.B. 1250" min="0" step="0.01" />
+    </div>
+    <div class="form-group">
+      <label>Notiz (optional)</label>
+      <input type="text" id="inp-notiz" placeholder="z.B. Langfristig halten" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Abbrechen</button>
+      <button class="btn-save" onclick="speichern()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<footer>Alle Daten werden nur lokal auf deinem Gerät gespeichert.</footer>
+
+<script>
+  let positionen = JSON.parse(localStorage.getItem('portfolio') || '[]');
+
+  document.getElementById('datum').textContent = new Date().toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  function euro(n) {
+    return n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+  }
+
+  function prozent(n) {
+    return (n >= 0 ? '+' : '') + n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' %';
+  }
+
+  function render() {
+    const tbody = document.getElementById('tabelle');
+    tbody.innerHTML = '';
+
+    let gesamtInvest = 0, gesamtWert = 0;
+
+    if (positionen.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" class="empty">Noch keine Positionen. Füge deine erste Position hinzu!</td></tr>';
+    }
+
+    positionen.forEach((p, i) => {
+      const gl = p.wert - p.invest;
+      const glp = p.invest > 0 ? (gl / p.invest) * 100 : 0;
+      gesamtInvest += p.invest;
+      gesamtWert += p.wert;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="checkbox" class="check-item" data-index="${i}"></td>
+        <td><strong>${p.name}</strong></td>
+        <td><span class="badge ${p.typ}">${p.typ.toUpperCase()}</span></td>
+        <td>${euro(p.invest)}</td>
+        <td>${euro(p.wert)}</td>
+        <td class="${gl >= 0 ? 'plus' : 'minus'}">${gl >= 0 ? '+' : ''}${euro(gl)}</td>
+        <td class="${glp >= 0 ? 'plus' : 'minus'}">${prozent(glp)}</td>
+        <td style="color:#888;font-size:12px">${p.notiz || '—'}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    const gesamtGL = gesamtWert - gesamtInvest;
+    const gesamtGLP = gesamtInvest > 0 ? (gesamtGL / gesamtInvest) * 100 : 0;
+
+    document.getElementById('sum-invest').textContent = euro(gesamtInvest);
+    document.getElementById('sum-wert').textContent = euro(gesamtWert);
+    document.getElementById('sum-gl').textContent = (gesamtGL >= 0 ? '+' : '') + euro(gesamtGL);
+    document.getElementById('sum-glp').textContent = prozent(gesamtGLP);
+
+    const cardGL = document.getElementById('card-gl');
+    const cardGLP = document.getElementById('card-glp');
+    cardGL.className = 'card ' + (gesamtGL >= 0 ? 'green' : 'red');
+    cardGLP.className = 'card ' + (gesamtGLP >= 0 ? 'green' : 'red');
+  }
+
+  function openModal() {
+    document.getElementById('modal').classList.add('active');
+    document.getElementById('inp-name').focus();
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('active');
+    ['inp-name','inp-invest','inp-wert','inp-notiz'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('inp-typ').value = 'aktie';
+  }
+
+  function speichern() {
+    const name = document.getElementById('inp-name').value.trim();
+    const typ = document.getElementById('inp-typ').value;
+    const invest = parseFloat(document.getElementById('inp-invest').value);
+    const wert = parseFloat(document.getElementById('inp-wert').value);
+    const notiz = document.getElementById('inp-notiz').value.trim();
+
+    if (!name || isNaN(invest) || isNaN(wert)) {
+      alert('Bitte Name, investierten Betrag und aktuellen Wert angeben.');
+      return;
+    }
+
+    positionen.push({ name, typ, invest, wert, notiz });
+    localStorage.setItem('portfolio', JSON.stringify(positionen));
+    closeModal();
+    render();
+  }
+
+  function alleAuswaehlen(cb) {
+    document.querySelectorAll('.check-item').forEach(c => c.checked = cb.checked);
+  }
+
+  function loescheAuswahl() {
+    const ausgewaehlt = [...document.querySelectorAll('.check-item:checked')].map(c => parseInt(c.dataset.index));
+    if (ausgewaehlt.length === 0) { alert('Bitte zuerst Positionen auswählen.'); return; }
+    if (!confirm(`${ausgewaehlt.length} Position(en) wirklich löschen?`)) return;
+    positionen = positionen.filter((_, i) => !ausgewaehlt.includes(i));
+    localStorage.setItem('portfolio', JSON.stringify(positionen));
+    document.getElementById('checkAll').checked = false;
+    render();
+  }
+
+  render();
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js');
+  }
+</script>
+</body>
+</html>
